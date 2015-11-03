@@ -1,5 +1,6 @@
 package quoridor;
 
+import players.ComputerPlayer;
 import players.QuoridorPlayer;
 import players.HumanPlayer;
 import players.BasicComputerPlayer;
@@ -19,7 +20,8 @@ public class Quoridor {
         display = new GameDisplay(state);
         players = new QuoridorPlayer[2];
         players[0] = new HumanPlayer(state, 0, this);
-        players[1] = new BasicComputerPlayer(state, 1, this);
+        players[1] = new ComputerPlayer(state, 1, this);
+//        players[0] = new BasicComputerPlayer(state, 0, this);
         for (int i = 0; i < 2; i++) {
             players[i].setDisplay(display);
         }
