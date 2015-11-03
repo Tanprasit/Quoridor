@@ -28,18 +28,19 @@ public class ComputerPlayer extends QuoridorPlayer {
 
             List<Move> legalMoves = GameState2P.getLegalMoves(state, index);
             double bestScore = 0;
+
             for (Move m : legalMoves) {
-                GameState2P next = m.doMove(state);
-                double score = getMinScoreAlphaBeta(next, maxDepth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
                 if ((System.nanoTime() - startTime) >= maxTime) {
                     break;
                 }
+
+                GameState2P next = m.doMove(state);
+                double score = getMinScoreAlphaBeta(next, maxDepth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
                 if (bestMove == null || score > bestScore) {
                     bestMove = m;
                     bestScore = score;
                 }
-                System.out.println("best score: " + score);
             }
         }
 
