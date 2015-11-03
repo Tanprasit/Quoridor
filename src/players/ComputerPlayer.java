@@ -12,6 +12,7 @@ public class ComputerPlayer extends QuoridorPlayer {
 
     private int indexOpponent;
     private int maxDepth = 0;
+    private int pruneCount = 0;
 
     private static long maxTime = TimeUnit.NANOSECONDS.convert(5, TimeUnit.SECONDS);
 
@@ -24,27 +25,48 @@ public class ComputerPlayer extends QuoridorPlayer {
         long startTime = System.nanoTime();
         Move bestMove = null;
 
-        for (maxDepth = 1;(System.nanoTime() - startTime) <= maxTime; maxDepth++) {
+        double aspirationValue = 10;
+        double previousScore = 0;
+        double bestScore = 0;
+        double score;
+
+        double alpha = Double.NEGATIVE_INFINITY;
+        double beta = Double.POSITIVE_INFINITY;
+
+        for (maxDepth = 1; (System.nanoTime() - startTime) <= maxTime; maxDepth++) {
 
             List<Move> legalMoves = GameState2P.getLegalMoves(state, index);
-            double bestScore = 0;
 
             for (Move m : legalMoves) {
                 if ((System.nanoTime() - startTime) >= maxTime) {
+                    System.out.println("BREAK! depth level: " + maxDepth + " prune count: " + pruneCount);
+                    pruneCount = 0;
                     break;
                 }
 
                 GameState2P next = m.doMove(state);
-                double score = getMinScoreAlphaBeta(next, maxDepth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                score = getMinScoreAlphaBeta(next, maxDepth, alpha, beta);
+
+                if (score <= alpha || score >= beta ) {
+                    alpha = Double.NEGATIVE_INFINITY;
+                    beta = Double.POSITIVE_INFINITY;
+                    score = getMinScoreAlphaBeta(next, maxDepth, alpha, beta);
+                }
+//
+                alpha = previousScore - aspirationValue;
+                beta = previousScore + aspirationValue;
+
+//                System.out.println("alpha: " + alpha + " ,beta: " + beta + ", previous: " + previousScore);
 
                 if (bestMove == null || score > bestScore) {
                     bestMove = m;
                     bestScore = score;
                 }
+
             }
+            previousScore = bestScore;
         }
 
-        System.out.println("BREAK! depth level: " + maxDepth);
         GameState2P newState = bestMove.doMove(state);
         game.doMove(index, newState);
     }
@@ -65,6 +87,7 @@ public class ComputerPlayer extends QuoridorPlayer {
                 res = Math.min(res, score);
                 beta = Math.min(beta, score);
                 if (beta <= alpha) {
+                    pruneCount++;
                     break;
                 }
             }
@@ -88,6 +111,7 @@ public class ComputerPlayer extends QuoridorPlayer {
                 res = Math.max(res, score);
                 alpha = Math.max(alpha, score);
                 if (beta <= alpha) {
+                    pruneCount++;
                     break;
                 }
             }
