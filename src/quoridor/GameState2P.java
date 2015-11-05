@@ -10,28 +10,28 @@ import moves.*;
 public class GameState2P {
 
     //dimensions of the board
-    private int width = 5;    
+    private int width = 5;
     private int height = 5;
-    
+
     //number of walls each player can place
     private int wallsPerPlayer = 5;
-    
+
     //the collection of walls that are currently on the board
     private WallStructure assignedWalls;
-    
+
     //the current states of each player
     private int[] row;
-    private int[] col;        
+    private int[] col;
     private int[] nrWallsLeft;
-    
+
     /*
      * The shortest path from each cell to the top and bottom rows
      * is used for the heuristic evaluation by the computer player
      * and to find out which wall positions are legal
-     */ 
+     */
     private int[][] distanceToTop;
     private int[][] distanceToBottom;
-    
+
     /*
      * The following arrays encode which moves are legal across the board    
      */
@@ -39,7 +39,7 @@ public class GameState2P {
     boolean[][] rightLegal;
     boolean[][] upLegal;
     boolean[][] downLegal;
-    
+
     /* 
      * The arrays distanceToTop, distanceTobottom, leftLegal, rightLegal, upLegal
      * and downLegal need to be recomputed every time a wall is added. This is 
@@ -141,7 +141,7 @@ public class GameState2P {
             }
         }
         return true;
-    }   
+    }
 
     private boolean moveDownLegal(int r, int c) {
         if (r == 0) {
@@ -157,7 +157,7 @@ public class GameState2P {
         }
         return true;
     }
-    
+
     private boolean moveRightLegal(int r, int c) {
         if (c == width - 1) {
             //we are at the rightmost column of the board
@@ -187,7 +187,7 @@ public class GameState2P {
         }
         return true;
     }
-    
+
     public GameState2P moveUp(int playerIndex) {
         if (upLegal[row[playerIndex]][col[playerIndex]]) {
             GameState2P newState = new GameState2P(this);
@@ -198,7 +198,7 @@ public class GameState2P {
             return null;
         }
     }
-    
+
     public GameState2P moveDown(int playerIndex) {
         if (downLegal[row[playerIndex]][col[playerIndex]]) {
             GameState2P newState = new GameState2P(this);
@@ -210,7 +210,7 @@ public class GameState2P {
         }
     }
 
-    
+
     public GameState2P moveRight(int playerIndex) {
         if (rightLegal[row[playerIndex]][col[playerIndex]]) {
             GameState2P newState = new GameState2P(this);
@@ -220,7 +220,7 @@ public class GameState2P {
         else {
             return null;
         }
-    }  
+    }
 
     public GameState2P moveLeft(int playerIndex) {
         if (leftLegal[row[playerIndex]][col[playerIndex]]) {
@@ -258,7 +258,7 @@ public class GameState2P {
 
     private void initDistances() {
         int h = assignedWalls.hashCode() % cache.length;
-        if (cache[h] != null && cache[h].assignedWalls.equals(assignedWalls)) {              
+        if (cache[h] != null && cache[h].assignedWalls.equals(assignedWalls)) {
             leftLegal = cache[h].leftLegal;
             rightLegal = cache[h].rightLegal;
             upLegal = cache[h].upLegal;
@@ -266,7 +266,7 @@ public class GameState2P {
             distanceToTop = cache[h].distanceToTop;
             distanceToBottom = cache[h].distanceToBottom;
         }
-        else {            
+        else {
             leftLegal = new boolean[height][width];
             rightLegal = new boolean[height][width];
             upLegal = new boolean[height][width];
@@ -347,7 +347,7 @@ public class GameState2P {
         List<Move> res = new ArrayList();
         int r = state.row[index];
         int c = state.col[index];
-        
+
         //Check in which directions the player can move
         if (state.moveDownLegal(r, c)) {
             res.add(new PlayerDownMove(index));
@@ -361,7 +361,7 @@ public class GameState2P {
         if (state.moveRightLegal(r, c)) {
             res.add(new PlayerRightMove(index));
         }
-        
+
         //Check at which positions a wall can be added
         for (int i = 1; i < state.height - 1; i++) {
             for (int j = 0; j < state.width-1; j++) {
@@ -392,15 +392,16 @@ public class GameState2P {
         int opponentDistToGoal;
         int nrWalls;
         int opponentNrWalls;
-
+        boolean winning=false;
+        boolean losing=false;
         if (index == 0) {
             if (row[0] == height - 1) //we have won
             {
-                return 1000;
+                winning=true;
             }
             if (row[1] == 0) //we have lost
             {
-                return -1000;
+                losing=true;
             }
             if (distanceToTop == null) {
                 initDistances();
@@ -413,11 +414,11 @@ public class GameState2P {
         else {
             if (row[0] == height - 1) //we have lost
             {
-                return -1000;
+                losing=true;
             }
             if (row[1] == 0) //we have won
             {
-                return 1000;
+                winning=true;
             }
             if (distanceToTop == null) {
                 initDistances();
@@ -427,7 +428,12 @@ public class GameState2P {
             opponentNrWalls = nrWallsLeft[0];
             nrWalls = nrWallsLeft[1];
         }
-        return (opponentDistToGoal - distToGoal);
+        int res =(opponentDistToGoal - distToGoal);
+        if(winning)
+            res+=1000;
+        if(losing)
+            res-=1000;
+        return res;
     }
 
     public boolean equals (Object o){
@@ -442,7 +448,7 @@ public class GameState2P {
         }
         return true;
     }
-    
+
     public int hashCode(){
         int res = assignedWalls.hashCode();
         for(int i=0;i<row.length;i++){
@@ -452,8 +458,8 @@ public class GameState2P {
         }
         return res;
     }
-    
-    
+
+
     /*
      * Inner class which is used to implement breadth-first search
      * in the method initDistances
