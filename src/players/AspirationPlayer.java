@@ -27,7 +27,7 @@ public class AspirationPlayer extends QuoridorPlayer {
         int maxDepth;
 
         // w - small constant we want to use as the window between
-        double window = 10;
+        double window = 50;
 
         // We need to initialize alpha and beta -infinity and + infinity respectively.
         double alpha = Double.NEGATIVE_INFINITY;
@@ -39,7 +39,7 @@ public class AspirationPlayer extends QuoridorPlayer {
 
             for (Move m : legalMoves) {
                 // If we run out time we break out.
-                if ((System.nanoTime() - startTime) >= maxTime) {
+                if ((System.nanoTime() - startTime) > maxTime) {
                     break;
                 }
 

@@ -1,9 +1,6 @@
 package quoridor;
 
-import players.AspirationPlayer;
-import players.BasicComputerPlayer;
-import players.QuoridorPlayer;
-import players.TranspositionPlayer;
+import players.*;
 
 /**
  *

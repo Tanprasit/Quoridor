@@ -10,19 +10,50 @@ import java.util.concurrent.TimeUnit;
 public class ComputerPlayer extends QuoridorPlayer {
 
     /**
-     * Q: A brief overview of the speed-up you have been able to achieve
      *
-     * Note - All players were tested against basic computer with maxDepth set to 5. Player will repeat the test 5 times
-     * to find the average.
+     * Q: A brief overview of the limitations of your implementation that you are aware of.
      *
-     * A: Computer Player or Iterative Deepening player achieves depth level 21 on average without aspiration
+     * A: All task had been implemented.
+     *
+     * Bugs - Going first improves the player's chance of winning. I think it is possible that when player 1 player
+     *        somewhat optimally, player 2 will eventually run out of possible counter moves due to the board's
+     *        size/ dimension.
+     *
+     *
+     *
+     * Q: A brief overview of any external sources you have used.
+     *
+     * A: I had used the following wikipedia pages extensively, especially the algorithms section.
+     *      - https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search
+     *      - https://en.wikipedia.org/wiki/Transposition_table
+     *
+     *  I had also used the following pdf to grasp a better understanding of each search.
+     *      -  http://homepages.cwi.nl/~paulk/theses/Carolus.pdf
+     *
+     *  I had discussed on a high abstracted level the problems like the depth level that searches can achieve and
+     *  the way reordering should work. I had also discussed whether or not a player could be the other.
+     *      students:
+     *      - Kyle Pinheiro
+     *      - Thomas Petty
+     *      - Christopher Paterson
+     *      - Matthew Jones
+     *
+     *
+     *
+     * Q: A brief overview of the speed-up you have been able to achieve.
+     *
+     * Note - All players were tested against basic computer with maxDepth set to 3. Each player will be played 5 times
+     * to find the average depth when the game is over. Because getting the depth at the end of the game is an unrealistic
+     * comparison between the players I will take an average of the 6th depth level.
+     *
+     * A: Computer Player or Iterative Deepening player achieves depth level 12 on average without aspiration
      * search.
      *
-     * Iterative with Aspiration search performs roughly the same as Iterative deepening. On average it ends up at
-     * depth 21.
+     * Iterative with Aspiration search performs a little better than Iterative deepening. On average it ends up at
+     * depth 14.
      *
-     * Iterative with Transposition achieves depth level of 13 when it had won.
-     *
+     * Iterative with Transposition achieves depth level of 45. However unlike the other two it had lost against it's
+     * opponent.
      *
      */
 
