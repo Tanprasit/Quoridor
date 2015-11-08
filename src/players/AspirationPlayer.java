@@ -19,48 +19,60 @@ public class AspirationPlayer extends QuoridorPlayer {
 
     // Discussed possible methods to break during iterative deepening when time exceeds with Thomas Petty.
     public void chooseMove() {
+        List<Move> legalMoves = GameState2P.getLegalMoves(state, index);
         long startTime = System.nanoTime();
         Move bestMove = null;
-        double aspirationValue = 10;
         double previousBestScore = 0;
-        double score;
         double bestScore = 0;
         int maxDepth;
 
+        // w - small constant we want to use as the window between
+        double window = 10;
+
+        // We need to initialize alpha and beta -infinity and + infinity respectively.
         double alpha = Double.NEGATIVE_INFINITY;
         double beta = Double.POSITIVE_INFINITY;
 
+        // Initialize the iterative deepening loop.
         for (maxDepth = 1; (System.nanoTime() - startTime) <= maxTime; maxDepth++) {
             bestScore = 0;
-            List<Move> legalMoves = GameState2P.getLegalMoves(state, index);
 
             for (Move m : legalMoves) {
-                if ((System.nanoTime() - startTime) > maxTime) {
+                // If we run out time we break out.
+                if ((System.nanoTime() - startTime) >= maxTime) {
                     break;
                 }
 
                 GameState2P next = m.doMove(state);
-                score = getMinScoreAlphaBeta(next, maxDepth, alpha, beta);
+                double score = getMinScoreAlphaBeta(next, maxDepth, alpha, beta);
 
-                if (score <= alpha || score >= beta) {
-                    alpha = Double.NEGATIVE_INFINITY;
+                // If the score that we had found was greater than beta or if it was less than alpha.
+                // Then the score is not correct as we had pruned too much of the tree.
+                // We need to perform the minimax score again with -inf and +inf, in order to search
+                // tree without cutting out too much of the tree straightaway.
+                if (score >= beta) { // fail high
                     beta = Double.POSITIVE_INFINITY;
-                    score = getMinScoreAlphaBeta(next, maxDepth, alpha, beta);
+                    score = getMinScoreAlphaBeta(next, maxDepth, score, beta);
+                } else if (score <= alpha){ // fail low
+                    alpha = Double.NEGATIVE_INFINITY;
+                    score = getMinScoreAlphaBeta(next, maxDepth, alpha, score);
                 }
 
-                alpha = previousBestScore - aspirationValue;
-                beta = previousBestScore + aspirationValue;
+                // Reinitialize alpha and beta with the aspiration window.
+                alpha = previousBestScore - window;
+                beta = previousBestScore + window;
 
-                if (bestMove == null || score > bestScore) {
+                if (bestMove == null || score >= bestScore) {
                     bestMove = m;
                     bestScore = score;
                 }
             }
 
+            // Set the previous best score after we have finished iterative deepening of a certain depth.
             previousBestScore = bestScore;
         }
 
-        System.out.println("Depth level: " + maxDepth + " aspir score: " + bestScore);
+        System.out.println("Depth: " + maxDepth + " aspir score: " + bestScore);
         GameState2P newState = bestMove.doMove(state);
         game.doMove(index, newState);
     }
@@ -93,7 +105,6 @@ public class AspirationPlayer extends QuoridorPlayer {
      */
     private double getMaxScoreAlphaBeta(GameState2P s, int depth, double alpha, double beta) {
         double res;
-
         if (depth == 0 || s.isGameOver()) {
             res = s.evaluateState(index);
         } else {

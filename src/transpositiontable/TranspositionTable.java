@@ -10,7 +10,8 @@ public class TranspositionTable {
         this.transpositionTable = new TranspositionEntry[(int) 10e6];
     }
 
-    public void addTranspositionEntry(TranspositionEntry transpositionEntry) {
+    public void addEntry(GameState2P gameState2P, double minimax, int depth) {
+        TranspositionEntry transpositionEntry = new TranspositionEntry(gameState2P, minimax, depth);
         int index = transpositionEntry.getGameState2P().hashCode() % transpositionTable.length;
         this.transpositionTable[index] = transpositionEntry;
     }

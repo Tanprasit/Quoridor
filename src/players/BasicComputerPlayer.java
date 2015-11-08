@@ -1,10 +1,11 @@
 package players;
 
-import java.util.List;
-import java.util.Random;
+import moves.Move;
 import quoridor.GameState2P;
 import quoridor.Quoridor;
-import moves.*;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -14,7 +15,7 @@ public class BasicComputerPlayer extends QuoridorPlayer {
 
     public static Random random = new Random();
     private int indexOpponent;
-    private int maxDepth = 2;
+    private int maxDepth = 4;
 
     public BasicComputerPlayer(GameState2P state, int index, Quoridor game) {
         super(state, index, game);
@@ -29,7 +30,6 @@ public class BasicComputerPlayer extends QuoridorPlayer {
             GameState2P next = m.doMove(state);
             double score = getMinScoreAlphaBeta(next, maxDepth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
             if (bestMove == null || score > bestScore) {
-//                System.out.println("depth: " + maxDepth + " overriding with: " + score);
                 bestMove = m;
                 bestScore = score;
             }
