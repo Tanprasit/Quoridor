@@ -13,11 +13,10 @@ public class ComputerPlayer extends QuoridorPlayer {
      *
      * Q: A brief overview of the limitations of your implementation that you are aware of.
      *
-     * A: All task had been implemented.
+     * A: All tasks had been implemented. Transposition table player depth increases exponentially. So the higher depths
+     *    will only appear when the game is nearly over.
      *
-     * Bugs - Going first improves the player's chance of winning. I think it is possible that when player 1 player
-     *        somewhat optimally, player 2 will eventually run out of possible counter moves due to the board's
-     *        size/ dimension.
+     * Bugs - Going first improves the player's chance of winning.
      *
      *
      *
@@ -30,8 +29,8 @@ public class ComputerPlayer extends QuoridorPlayer {
      *  I had also used the following pdf to grasp a better understanding of each search.
      *      -  http://homepages.cwi.nl/~paulk/theses/Carolus.pdf
      *
-     *  I had discussed on a high abstracted level the problems like the depth level that searches can achieve and
-     *  the way reordering should work. I had also discussed whether or not a player could be the other.
+     *  I had discussed on a high abstracted level the problems like the depth level that each search can achieve and
+     *  the way reordering should work. I had also discussed whether or not a player could beat the other.
      *      students:
      *      - Kyle Pinheiro
      *      - Thomas Petty
