@@ -52,8 +52,9 @@ public class ComputerPlayer extends QuoridorPlayer {
      * Iterative with Aspiration search performs a little better than Iterative deepening. On average it ends up at
      * depth 14.
      *
-     * Iterative with Transposition achieves depth level of 45. However unlike the other two it had lost against it's
-     * opponent.
+     * Iterative with Transposition achieves depth level of 45. However unlike the other two the jump in depth level
+     * doesn't appear straight away. The game needs to progress for a while, before it can exploit the transposition
+     * table.
      *
      */
 

@@ -15,7 +15,7 @@ public class BasicComputerPlayer extends QuoridorPlayer {
 
     public static Random random = new Random();
     private int indexOpponent;
-    private int maxDepth = 5;
+    private int maxDepth = 3;
 
     public BasicComputerPlayer(GameState2P state, int index, Quoridor game) {
         super(state, index, game);

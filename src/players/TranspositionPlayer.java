@@ -16,8 +16,8 @@ public class TranspositionPlayer extends QuoridorPlayer {
 
     private int indexOpponent;
     private static long maxTime = TimeUnit.NANOSECONDS.convert(5, TimeUnit.SECONDS);
-    private TranspositionTable minTable = new TranspositionTable();
     private TranspositionTable maxTable = new TranspositionTable();
+    private TranspositionTable minTable = new TranspositionTable();
 
     public TranspositionPlayer(GameState2P state, int index, Quoridor game) {
         super(state, index, game);
@@ -69,10 +69,10 @@ public class TranspositionPlayer extends QuoridorPlayer {
         double score;
 
         // We try to get the current state from the transposition table.
-        TranspositionEntry entry = maxTable.getEntryFromGameState(state);
+        TranspositionEntry entry = minTable.getEntryFromGameState(state);
 
         // Get the opponent's move.
-        List<Move> opponentMoves = GameState2P.getLegalMoves(state, indexOpponent);
+        final List<Move> opponentMoves = GameState2P.getLegalMoves(state, indexOpponent);
 
         // Check if the entry exists, the same as the same state in the entry and that the depth is less that the depth
         // stored in the entry. We need to check the state as it is possible that two state has the same hashcode.
@@ -84,62 +84,7 @@ public class TranspositionPlayer extends QuoridorPlayer {
         if (depth == 0 || state.isGameOver()) {
             res = state.evaluateState(index);
         } else {
-            // For the minscore we need to sort the opponent's move so that the child (our best moves) get tried first.
-            Comparator<Move> comparator = new Comparator<Move>() {
-                @Override
-                public int compare(Move move1, Move move2) {
-                    int lhs = (null != maxTable.getEntryFromGameState(move1.doMove(state)))
-                            ? (int) maxTable.getEntryFromGameState(move1.doMove(state)).getMinimax()
-                            : (int) Double.NEGATIVE_INFINITY;
-                    int rhs = (null != maxTable.getEntryFromGameState(move2.doMove(state)))
-                            ? (int) maxTable.getEntryFromGameState(move2.doMove(state)).getMinimax()
-                            : (int) Double.NEGATIVE_INFINITY;
-
-                    if (lhs < rhs) {
-                        return 1;
-                    } else if (lhs == rhs) {
-                        return 0;
-                    } else {
-                        return -1;
-                    }
-                }
-            };
-
-
-            Collections.sort(opponentMoves, comparator);
-
-            // For the opponent they'll consider our best moves first. So as long as the higest moves gets tried first
-            // it will be an optimum search.
-            for (Move move : opponentMoves) {
-                GameState2P next = move.doMove(state);
-                score = getMaxScoreAlphaBeta(next, depth - 1, alpha, beta);
-                res = Math.min(res, score);
-                beta = Math.min(beta, score);
-                if (beta <= alpha) {
-                    maxTable.addEntry(state, res, depth);
-                    break;
-                }
-            }
-        }
-        return res;
-    }
-
-    /*
-     * Consider all possible moves we can play
-     */
-    private double getMaxScoreAlphaBeta(final GameState2P state, int depth, double alpha, double beta) {
-        double res = Double.NEGATIVE_INFINITY;
-        double score;
-        TranspositionEntry entry = minTable.getEntryFromGameState(state);
-        List<Move> myMoves = GameState2P.getLegalMoves(state, index);
-
-        if (null != entry && state.equals(entry.getGameState2P()) && depth <= entry.getDepth()) {
-            res = entry.getMinimax();
-        }
-
-        if (depth == 0 || state.isGameOver()) {
-            res = state.evaluateState(index);
-        } else {
+            // For the miniscore we need to sort the opponent's move so that the child (our best moves) get tried first.
             Comparator<Move> comparator = new Comparator<Move>() {
                 @Override
                 public int compare(Move move1, Move move2) {
@@ -160,7 +105,66 @@ public class TranspositionPlayer extends QuoridorPlayer {
                 }
             };
 
+
+            Collections.sort(opponentMoves, comparator);
+
+            // For the opponent they'll consider our best moves first. So as long as the higest moves gets tried first
+            // it will be an optimum search.
+            for (Move move : opponentMoves) {
+                GameState2P next = move.doMove(state);
+                score = getMaxScoreAlphaBeta(next, depth - 1, alpha, beta);
+                res = Math.min(res, score);
+                beta = Math.min(beta, score);
+                if (beta <= alpha) {
+                    minTable.addEntry(next, res, depth);
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+    /*
+     * Consider all possible moves we can play
+     */
+    private double getMaxScoreAlphaBeta(final GameState2P state, int depth, double alpha, double beta) {
+        double res = Double.NEGATIVE_INFINITY;
+        double score;
+
+        TranspositionEntry entry = maxTable.getEntryFromGameState(state);
+        List<Move> myMoves = GameState2P.getLegalMoves(state, index);
+
+        if (null != entry && state.equals(entry.getGameState2P()) && depth <= entry.getDepth()) {
+            res = entry.getMinimax();
+        }
+
+        if (depth == 0 || state.isGameOver()) {
+            res = state.evaluateState(index);
+        } else {
+            final Comparator<Move> comparator = new Comparator<Move>() {
+                @Override
+                public int compare(Move move1, Move move2) {
+                    int lhs = (null != maxTable.getEntryFromGameState(move1.doMove(state)))
+                            ? (int) maxTable.getEntryFromGameState(move1.doMove(state)).getMinimax()
+                            : (int) Double.POSITIVE_INFINITY;
+                    int rhs = (null != maxTable.getEntryFromGameState(move2.doMove(state)))
+                            ? (int) maxTable.getEntryFromGameState(move2.doMove(state)).getMinimax()
+                            : (int) Double.POSITIVE_INFINITY;
+
+                    if (lhs < rhs) {
+                        return 1;
+                    } else if (lhs == rhs) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                }
+            };
+
             Collections.sort(myMoves, comparator);
+
+            // For the opponent they'll consider our best moves first. So as long as the higest moves gets tried first
+            // it will be an optimum search.
             for (Move move : myMoves) {
                 GameState2P next = move.doMove(state);
                 score = getMinScoreAlphaBeta(next, depth - 1, alpha, beta);
@@ -168,7 +172,7 @@ public class TranspositionPlayer extends QuoridorPlayer {
                 alpha = Math.max(alpha, score);
 
                 if (beta <= alpha) {
-                    minTable.addEntry(state, res, depth);
+                    maxTable.addEntry(next, res, depth);
                     break;
                 }
             }
